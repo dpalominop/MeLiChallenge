@@ -3,7 +3,7 @@ col_to_remove = ["start_time", "stop_time", "date_created", "permalink", "thumbn
                  "sub_status", "deal_ids", "site_id", "listing_source", "coverage_areas", 
                  "international_delivery_mode", "official_store_id", "differential_pricing", 
                  "original_price", "currency_id", "status", "video_id", "catalog_product_id", 
-                 "subtitle", "descriptions", "id", "parent_item_id", "location"]
+                 "subtitle", "descriptions", "id", "parent_item_id", "location", "base_price"]
 
 def remove_columns(df, columns):
     return df.drop(columns, axis=1)

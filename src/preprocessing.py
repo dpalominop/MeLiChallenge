@@ -1,7 +1,7 @@
 import pandas as pd
 
-from data_cleaning import remove_columns, convert_list_into_len, get_non_mercado_pago_info, get_shipping_mode_info
-from data_cleaning import col_to_remove, col_to_len
+from .data_cleaning import remove_columns, convert_list_into_len, get_non_mercado_pago_info, get_shipping_mode_info
+from .data_cleaning import col_to_remove, col_to_len
 
 def convert_condition(df):
     df["condition"] = df["condition"].map({"new": 0, "used":1})
@@ -28,6 +28,14 @@ def convert_category_id(df):
     
     return df
 
+def convert_category_id_test(df):
+    cats = ['MLA1227', 'MLA1383', 'MLA15171', 'MLA15328', 'MLA2038', 'MLA2044', 'MLA3530', 'MLA41287']
+    
+    df["category_id"] = df["category_id"].apply(lambda x: "others" if x not in cats else x)
+    df = df.join(pd.get_dummies(df.pop("category_id"), prefix='cat.'))
+    
+    return df
+
 def convert_accepts_mercadopago(df):
     df["accepts_mercadopago"] = df["accepts_mercadopago"].apply(lambda x: int(x))
     return df
@@ -43,11 +51,18 @@ def convert_non_mercado_pago(df):
 def convert_shipping_mode(df):
     df = df.join(pd.get_dummies(df.pop("shipping_mode"), prefix='shim.'))
     return df
-
     
-def fill_nan_texts():
+def fill_nan_texts(df):
     df["warranty"] = df["warranty"].fillna("")
     df["title"] = df["title"].fillna("")
+    
+def sort_columns(df):
+    df = df.reindex(sorted(df.columns), axis=1)
+    return df
+
+def drop_target(df):
+    df.drop(["condition"], axis=1, inplace=True)
+    return df
     
 def remove_text_columns(df, columns):
     df = df.drop(columns, axis=1)
@@ -86,6 +101,7 @@ def preprocess_training(df):
                         pipe(convert_automatic_relist).
                         pipe(convert_non_mercado_pago).
                         pipe(convert_shipping_mode).
+                        pipe(sort_columns).
                     
                         pipe(remove_text_columns, ["warranty", "title"]).
                         pipe(drop_duplicates).
@@ -105,14 +121,14 @@ def preprocess_testing(df):
                         pipe(convert_listing_type_id).
                         pipe(convert_buying_mode).
                         pipe(convert_tags).
-                        pipe(convert_category_id).
+                        pipe(convert_category_id_test).
                         pipe(convert_accepts_mercadopago).
                         pipe(convert_automatic_relist).
                         pipe(convert_non_mercado_pago).
                         pipe(convert_shipping_mode).
+                        pipe(sort_columns).
                     
                         pipe(remove_text_columns, ["warranty", "title"]).
-                        pipe(drop_duplicates).
                         pipe(normalize)
                    )
 
